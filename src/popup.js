@@ -14,10 +14,21 @@ function dumpBookmarks(query) {
   var bookmarkTreeNodes = chrome.bookmarks.getTree(
     function(bookmarkTreeNodes) {
       $('#bookmarks').append(dumpTreeNodes(bookmarkTreeNodes, query));
+	  
+  $('#auto-checkboxes').bonsai({
+  expandAll: true,
+  checkboxes: true, // depends on jquery.qubit plugin
+  createCheckboxes: true // takes values from data-name and data-value, and data-name is inherited
+});
     });
 }
 function dumpTreeNodes(bookmarkNodes, query) {
-  var list = $('<ul>');
+  var list = $('<ol>');
+  if(bookmarkNodes[0].parentId === undefined)
+  {
+	list.attr('id', 'auto-checkboxes');
+	list.attr('data-name', 'foo');
+  }
   var i;
   for (i = 0; i < bookmarkNodes.length; i++) {
     list.append(dumpNode(bookmarkNodes[i], query));
@@ -28,7 +39,7 @@ function dumpNode(bookmarkNode, query) {
   if (bookmarkNode.title) {
     if (query && !bookmarkNode.children) {
       if (String(bookmarkNode.title).indexOf(query) == -1) {
-        return $('<span></span>');
+        return $('<li></li>');
       }
     }
     var anchor = $('<a>');
@@ -42,11 +53,6 @@ function dumpNode(bookmarkNode, query) {
       chrome.tabs.create({url: bookmarkNode.url});
     });
     var span = $('<span>');
-	
-	var input = $('<input>');
-	input.attr('type', 'checkbox');
-	input.attr('value', bookmarkNode.id);
-	span.append(input);
     var options = bookmarkNode.children ?
       $('<span>[<a href="#" id="addlink">Add</a>]</span>') :
       $('<span>[<a id="editlink" href="#">Edit</a> <a id="deletelink" ' +
@@ -121,7 +127,8 @@ function dumpNode(bookmarkNode, query) {
         options.remove();
       }).append(anchor);
   }
-  var li = $(bookmarkNode.title ? '<li>' : '<div>').append(span);
+  var li = $('<li>').append(span);
+	li.attr('data-value', bookmarkNode.id);
   if (bookmarkNode.children && bookmarkNode.children.length > 0) {
     li.append(dumpTreeNodes(bookmarkNode.children, query));
   }
@@ -158,7 +165,7 @@ $(':checkbox:checked').each(function () {
 					complete: function() {
 					}
 				});
-			}
+			});
 		}
 		catch (ex)
 		{
@@ -191,5 +198,8 @@ $(':checkbox:checked').each(function () {
 
 document.addEventListener('DOMContentLoaded', function () {
   dumpBookmarks();
+
   document.getElementById('btnsync').addEventListener('click', SyncBookMarks);
+  
+  
 });
