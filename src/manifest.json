@@ -1,19 +1,28 @@
 {
-  "name": "My Bookmarks",
-  "version": "1.1",
-  "description": "A browser action with a popup dump of all bookmarks, including search, add, edit and delete.",
+  "name": "Chrome Delicious Sync",
+  "version": "1.2",
+  "description": "syncs booksmarks from Chrome with Delicious Bookmarking Service, based on the Chrome Extension Sample",
   "permissions": [
+	"identity",
+	"tabs",
+	"https://delicious.com/auth/authorize",
+	"https://avosapi.delicious.com/api/v1/oauth/token",
     "bookmarks",
 	"https://api.del.icio.us/",
     "http://localhost/"
   ],
   "browser_action": {
-      "default_title": "My Bookmarks",
+      "default_title": "Chrome Delicious Sync",
       "default_icon": "icon.png",
       "default_popup": "popup.html"
   },
   "manifest_version": 2,
-  "content_security_policy": "script-src 'self' https://ajax.googleapis.com; object-src 'self'"
-  
-  
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com; object-src 'self'",
+  "oauth2": {
+    "client_id": "a9adbe0c558cc27a3ec117e80dd29353",
+    "scopes": [
+      "https://delicious.com/auth/authorize"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi7k7iuwu6ljCrTVQ3Nzti4AHaQKAPLOB5oqh2zHm42AgrGDlUMpkZFtL5KA4wBovq7pKIUTf+hUonqOXnwBecWWq5FMOEwCkZCMQUiNcremabPc44DlDFgEHwe7ChD4oh2ZoRSXCGd4QuiV5OavRbM86d/J+SUjE0X7+omQCmbm7ppv9o84Sk6JJwe53CbSMFd79//uty/E1hbYSMUIrufWTbxcQHuPFG53VtR+wkCRnflNnG+SHCr7IZS3Mw3zwU/YejHgJ5RP9XVSkWKXAM97DwMCOtJGP/nyDiG+2yMf9rGXobzPWbI7nS3o9AQDXyZI+ERvTesRHitHjPJ8XpQIDAQAB"
 }

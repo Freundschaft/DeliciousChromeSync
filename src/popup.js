@@ -7,7 +7,7 @@ $(function() {
   $('#search').change(function() {
      $('#bookmarks').empty();
      dumpBookmarks($('#search').val());
-  });
+  });  
 });
 // Traverse the bookmark tree, and print the folder and nodes.
 function dumpBookmarks(query) {
@@ -16,7 +16,7 @@ function dumpBookmarks(query) {
       $('#bookmarks').append(dumpTreeNodes(bookmarkTreeNodes, query));
 	  
   $('#auto-checkboxes').bonsai({
-  expandAll: true,
+  expandAll: false,
   checkboxes: true, // depends on jquery.qubit plugin
   createCheckboxes: true // takes values from data-name and data-value, and data-name is inherited
 });
@@ -140,6 +140,15 @@ function TickChildrenBookMarks()
 	//Implement Function that makes child Bookmarks selected when the parent folder is selected
 }
 
+function DeliciousLogin()
+{
+chrome.identity.launchWebAuthFlow(
+  {'url': 'https://delicious.com/auth/authorize?client_id=a9adbe0c558cc27a3ec117e80dd29353&redirect_uri=https://pcfmpnploldofmgahfnikgdgpmmdahan.chromiumapp.org/delicious', 'interactive': true},
+	function(redirect_url) { /* Extract token from redirect_url */ 
+		alert(redirect_url.split('=')[1]);
+  });
+}
+
 function SyncBookMarks()
 {
 $(':checkbox:checked').each(function () {
@@ -152,15 +161,15 @@ $(':checkbox:checked').each(function () {
 			//Check for Children
 			results[0].children.each(function(index, value) {
 				$.ajax({
-					url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(value.url) + '&description=' + value.title + '&tags=webdev',
+					url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(value.url) + '&description=' + value.title + '&tags=' + results[0].title,
 					type: 'POST',
 					crossDomain: true,
 					dataType: 'text',
 					success: function(data, textstatus) { 
-						//alert('success: ' + textstatus + ' ' + JSON.stringify(data)); 
+						alert('success: ' + textstatus + ' ' + JSON.stringify(data)); 
 					},
 					error: function(data, textstatus) {
-						//alert('error: ' + textstatus + ' ' + JSON.stringify(data)); 
+						alert('error: ' + textstatus + ' ' + JSON.stringify(data)); 
 					},
 					complete: function() {
 					}
@@ -171,20 +180,25 @@ $(':checkbox:checked').each(function () {
 		{
 		}
 		
-		$.ajax({
-		url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(results[0].url) + '&description=' + results[0].title + '&tags=webdev',
-		type: 'POST',
-		crossDomain: true,
-		dataType: 'text',
-		success: function(data, textstatus) { 
-			//alert('success: ' + textstatus + ' ' + JSON.stringify(data)); 
-		},
-		error: function(data, textstatus) {
-			//alert('error: ' + textstatus + ' ' + JSON.stringify(data)); 
-		},
-		complete: function() {
-		}
-		});
+		
+		//get Parent
+		chrome.bookmarks.get(results[0].parentId, function(parent){
+			$.ajax({
+				url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(results[0].url) + '&description=' + results[0].title + '&tags=' + parent[0].title,
+				type: 'POST',
+				crossDomain: true,
+				dataType: 'text',
+				success: function(data, textstatus) { 
+					//alert('success: ' + textstatus + ' ' + JSON.stringify(data)); 
+				},
+				error: function(data, textstatus) {
+					//alert('error: ' + textstatus + ' ' + JSON.stringify(data)); 
+				},
+				complete: function() {
+				}
+			});
+		}); 
+		
 	/*
 		$.post( "https://api.del.icio.us/v1/posts/add", {url:results[0].url, description:results[0].title, tag:'webdev',meta:'yes'},function( data ) {
 		  alert(data);
@@ -200,6 +214,6 @@ document.addEventListener('DOMContentLoaded', function () {
   dumpBookmarks();
 
   document.getElementById('btnsync').addEventListener('click', SyncBookMarks);
-  
+  document.getElementById('btnLogin').addEventListener('click', DeliciousLogin);
   
 });
