@@ -1,4 +1,4 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+﻿// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -149,6 +149,28 @@ chrome.identity.launchWebAuthFlow(
   });
 }
 
+function stripVowelAccent(str)
+{
+ var rExps=[
+ {re:/[\xC0-\xC6]/g, ch:'A'},
+ {re:/[\xE0-\xE6]/g, ch:'a'},
+ {re:/[\xC8-\xCB]/g, ch:'E'},
+ {re:/[\xE8-\xEB]/g, ch:'e'},
+ {re:/[\xCC-\xCF]/g, ch:'I'},
+ {re:/[\xEC-\xEF]/g, ch:'i'},
+ {re:/[\xD2-\xD6]/g, ch:'O'},
+ {re:/[\xF2-\xF6]/g, ch:'o'},
+ {re:/[\xD9-\xDC]/g, ch:'U'},
+ {re:/[\xF9-\xFC]/g, ch:'u'},
+ {re:/[\xD1]/g, ch:'N'},
+ {re:/[\xF1]/g, ch:'n'} ];
+
+ for(var i=0, len=rExps.length; i<len; i++)
+  str=str.replace(rExps[i].re, rExps[i].ch);
+
+ return str;
+}
+
 function SyncBookMarks()
 {
 $(':checkbox:checked').each(function () {
@@ -160,8 +182,9 @@ $(':checkbox:checked').each(function () {
 		{
 			//Check for Children
 			results[0].children.each(function(index, value) {
+				console.log("Sending bookmark to delicious " + value.title);
 				$.ajax({
-					url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(value.url) + '&description=' + value.title + '&tags=' + results[0].title,
+					url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(value.url) + '&description=' + value.title + '&tags=' + stripVowelAccent(results[0].title),
 					type: 'POST',
 					crossDomain: true,
 					dataType: 'text',
@@ -181,10 +204,11 @@ $(':checkbox:checked').each(function () {
 		}
 		
 		
-		//get Parent
+		//get Parent, the title of the parent bookmark (usually a folder) is used for the tag at delicious
 		chrome.bookmarks.get(results[0].parentId, function(parent){
+			console.log("Sending bookmark to delicious " + results[0].title);
 			$.ajax({
-				url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(results[0].url) + '&description=' + results[0].title + '&tags=' + parent[0].title,
+				url: 'https://api.del.icio.us/v1/posts/add?url=' + escape(results[0].url) + '&description=' + results[0].title + '&tags=' + stripVowelAccent(parent[0].title),
 				type: 'POST',
 				crossDomain: true,
 				dataType: 'text',
